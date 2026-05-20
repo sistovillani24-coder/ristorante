@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Completo | </title>
+    <meta name="description" content="Il menu completo di AURA. Un viaggio attraverso i sapori contemporanei.">
+    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="page-inner">
+    <div class="preloader">
+        <span class="preloader-text">AURA</span>
+        <img class="preloader-img" src="" alt="Logo" style="display: none; max-height: 80px; width: auto; object-fit: contain;">
+    </div>
+    <script>
+        (function() {
+            const cachedColor = localStorage.getItem('aura_primary_color');
+            if (cachedColor) {
+                document.documentElement.style.setProperty('--accent', cachedColor);
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(cachedColor);
+                if(result) {
+                    window.siteAccentRGB = {
+                        r: parseInt(result[1], 16),
+                        g: parseInt(result[2], 16),
+                        b: parseInt(result[3], 16)
+                    };
+                }
+            }
+
+            const cachedName = localStorage.getItem('aura_restaurant_name');
+            if (cachedName) {
+                document.title = cachedName + " | Menu";
+                const preloaderText = document.querySelector('.preloader-text');
+                if (preloaderText) preloaderText.textContent = cachedName;
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('.logo-text').forEach(t => t.textContent = cachedName);
+                });
+            }
+
+            const cachedLogo = localStorage.getItem('aura_main_logo');
+            if (cachedLogo) {
+                const text = document.querySelector('.preloader-text');
+                const img = document.querySelector('.preloader-img');
+                if(text) text.style.display = 'none';
+                if(img) {
+                    img.src = cachedLogo;
+                    img.style.display = 'block';
+                }
+            }
+        })();
+    </script>
+    <div id="cursor" class="custom-cursor"></div>
+    <div id="cursor-follower" class="custom-cursor-follower"></div>
+
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo static-logo">
+                <span class="logo-text">AURA</span>
+                <img class="logo-img" src="" alt="AURA Logo" data-image-slot="main_logo" style="display: none; max-height: 40px; width: auto; object-fit: contain;">
+            </a>
+            <ul class="nav-links">
+                <li><a href="index.html#about" class="nav-item">La Storia</a></li>
+                <li><a href="menu.html" class="nav-item">Menu</a></li>
+                <li><a href="gallery.html" class="nav-item">Galleria</a></li>
+                <li><a href="index.html#team" class="nav-item">Il Team</a></li>
+                <li><a href="index.html#contact" class="nav-item btn-primary">Prenota</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-content">
+        <div class="container menu-page-container">
+            <div class="menu-page-header">
+                <h1 class="page-title scroll-reveal-text"><span class="text-inner">Menu Completo</span></h1>
+                <p class="page-subtitle scroll-reveal delay-1">Un viaggio attraverso i sapori contemporanei, guidato dall'istinto e dalla materia.</p>
+            </div>
+
+            <div class="dishes-grid" id="dynamic-menu-full">
+                <!-- I piatti verranno caricati dinamicamente dal database -->
+            </div>
+            
+        </div>
+    </main>
+
+    <footer>
+        <div class="container footer-content scroll-reveal">
+            <div class="footer-logo scroll-reveal-scale">
+                <span class="logo-text">AURA</span>
+                <img class="logo-img" src="" alt="AURA Logo" data-image-slot="main_logo" style="display: none; max-height: 60px; width: auto; object-fit: contain; margin: 0 auto;">
+            </div>
+            <div class="footer-social">
+                <a href="#" class="scroll-reveal delay-1">Instagram</a>
+                <a href="#" class="scroll-reveal delay-2">Facebook</a>
+            </div>
+            <div class="footer-copy scroll-reveal delay-3">
+                &copy; 2026 AURA Restaurant. Tutti i diritti riservati.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightbox-img" src="" alt="Immagine ingrandita">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
