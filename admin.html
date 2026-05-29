@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Admin Panel (Cloud)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --text-color: #f0f0f0;
+            --accent: #e2b659;
+            --accent-hover: #b89140;
+            --card-bg: #111111;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .admin-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--accent);
+            margin: 0;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-section, .list-section {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-family: 'Outfit', sans-serif;
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"], input[type="number"], textarea, select {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            box-sizing: border-box;
+        }
+
+        select option {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 0.5rem 0;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border: none;
+            padding: 1rem 2rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .dish-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            gap: 1rem;
+        }
+
+        .dish-item:last-child {
+            border-bottom: none;
+        }
+
+        .dish-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            background-color: #222;
+        }
+
+        .dish-info {
+            flex-grow: 1;
+        }
+
+        .dish-info h3 {
+            margin: 0 0 0.25rem 0;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.2rem;
+        }
+
+        .dish-info p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .dish-price {
+            font-weight: bold;
+            color: var(--accent);
+            margin-top: 0.25rem;
+            display: block;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            width: auto;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        #status-msg {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .success { background-color: rgba(40, 167, 69, 0.2); border: 1px solid #28a745; color: #28a745; }
+        .error { background-color: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; color: #dc3545; }
+
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .login-box {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 300px;
+            text-align: center;
+        }
+        .setup-warning {
+            background: #ffc107;
+            color: #000;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            display: none; /* Nascosto se le chiavi sono presenti */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h2>Accesso Admin</h2>
+            <div style="position: relative; margin-bottom: 1rem;">
+                <input type="password" id="admin-pass" placeholder="Password" style="width: 100%; padding: 0.8rem; box-sizing: border-box; padding-right: 40px;">
+                <span id="toggle-eye" onclick="togglePassword()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: var(--text-color); opacity: 0.7; display: flex;" title="Mostra/Nascondi Password">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" fill="currentColor">
+                        <path id="eye-path" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                </span>
+            </div>
+            <button onclick="checkPassword()">Accedi</button>
+        </div>
+    </div>
+
+    <div class="admin-container">
+        <div id="setup-warning" class="setup-warning">
+            ATTENZIONE: Devi inserire le chiavi del tuo progetto Firebase nel file admin.html e script.js per far funzionare il pannello!
+        </div>
+
+        <header>
+            <h1>AURA | Pannello CMS (Cloud)</h1>
+            <a href="index.html" style="color: var(--text-color); text-decoration: none;">&larr; Torna al Sito</a>
+        </header>
+
+        <div class="panel-grid">
+            <div class="left-column">
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h2>Aggiungi Nuovo Piatto</h2>
+                <form id="add-dish-form">
+                    <div class="form-group">
+                        <label for="title">Nome Piatto *</label>
+                        <input type="text" id="title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="price">Prezzo (es. €35) *</label>
+                        <input type="text" id="price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="order">Ordine di Visualizzazione (numero: 1, 2, 3...) *</label>
+                        <input type="number" id="order" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Descrizione / Ingredienti *</label>
+                        <textarea id="description" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="image">Immagine (Consigliata quadrata) *</label>
+                        <input type="file" id="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" id="submit-btn">Carica e Salva Piatto</button>
+                </form>
+                <div id="status-msg"></div>
+            </div>
+
+            <!-- Nuova Sezione Gestione Testi Sito -->
+            <div class="form-section" style="margin-bottom: 2rem;">
+                <h2>Impostazioni Generali</h2>
+                <form id="update-text-form" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="restaurant-name">Nome Ristorante (Testo Logo e Preloader) *</label>
+                        <input type="text" id="restaurant-name" placeholder="Es. AURA" required>
+                    </div>
+                    <button type="submit" id="submit-text-btn">Aggiorna Nome Ristorante</button>
+                </form>
+
+                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+
+                <form id="update-color-form">
+                    <div class="form-group">
+                        <label for="primary-color">Colore Principale del Sito *</label>
+                        <input type="color" id="primary-color" value="#E2B659" required style="width: 100%; height: 50px; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="submit" id="submit-color-btn">Aggiorna Colore</button>
+                        <button type="button" id="reset-color-btn" style="background-color: #6c757d;">Ripristina Originale</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Nuova Sezione Gestione Immagini -->
+            <div class="form-section">
+                <h2>Gestione Immagini Sito</h2>
+                <form id="update-image-form">
+                    <div class="form-group">
+                        <label for="image-slot">Seleziona Immagine da Cambiare *</label>
+                        <select id="image-slot" required>
+                            <option value="" disabled selected>Scegli un'immagine...</option>
+                            <option value="main_logo">Logo del Sito (Header e Footer)</option>
+                            <option value="hero_bg">Sfondo Iniziale (Hero)</option>
+                            <option value="about_image">Immagine "La Storia"</option>
+                            <option value="showcase_1">Slider Homepage - Piatto 1</option>
+                            <option value="showcase_2">Slider Homepage - Piatto 2</option>
+                            <option value="showcase_3">Slider Homepage - Piatto 3</option>
+                            <option value="team_chef">Team - Executive Chef</option>
+                            <option value="team_maitre">Team - Maitre D'</option>
+                            <option value="team_sommelier">Team - Head Sommelier</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="site-image">Nuova Immagine *</label>
+                        <input type="file" id="site-image" accept="image/*" required>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="submit" id="submit-img-btn">Aggiorna Immagine</button>
+                        <button type="button" id="reset-img-btn" style="background-color: #6c757d;">Ripristina Originale</button>
+                    </div>
+                </form>
+            </div>
+            </div>
+
+            <!-- Nuova Sezione Galleria Dinamica -->
+            <div class="form-section" style="margin-top: 2rem;">
+                <h2>Aggiungi Foto Galleria</h2>
+                <form id="add-gallery-form">
+                    <div class="form-group">
+                        <label for="gallery-order">Ordine di Visualizzazione (numero: 1, 2, 3...) *</label>
+                        <input type="number" id="gallery-order" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gallery-image">Immagine (Orizzontale o Verticale) *</label>
+                        <input type="file" id="gallery-image" accept="image/*" required>
+                    </div>
+                    <button type="submit" id="submit-gallery-btn">Carica e Salva Foto</button>
+                </form>
+                <div id="gallery-status-msg" style="margin-top: 1rem; display: none; padding: 1rem; border-radius: 4px;"></div>
+            </div>
+            </div>
+
+            <div class="right-column" style="display: flex; flex-direction: column; gap: 2rem;">
+                <div class="list-section">
+                    <h2>Menu Attuale (Cloud)</h2>
+                    <div id="dishes-list">
+                        <p>Caricamento in corso...</p>
+                    </div>
+                </div>
+
+                <div class="list-section">
+                    <h2>Galleria Attuale (Cloud)</h2>
+                    <div id="gallery-list">
+                        <p>Caricamento in corso...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Compat SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ==========================================
+        // INSERISCI QUI LA TUA CONFIGURAZIONE FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB5Uc3K7_0fnZZV-E3-cbLCrCagucCJuxQ",
+            authDomain: "menu-67421.firebaseapp.com",
+            projectId: "menu-67421",
+            storageBucket: "menu-67421.firebasestorage.app",
+            messagingSenderId: "975456424276",
+            appId: "1:975456424276:web:560c366265f116deb038c1",
+            measurementId: "G-E9M2Y2R4T6"
+        };
+        // ==========================================
+
+        if(firebaseConfig.apiKey === "INSERISCI_LA_TUA_API_KEY") {
+            document.getElementById('setup-warning').style.display = 'block';
+        }
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Global functions per UI
+        window.togglePassword = function() {
+            const passInput = document.getElementById('admin-pass');
+            const eyePath = document.getElementById('eye-path');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyePath.setAttribute('d', 'M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z');
+            } else {
+                passInput.type = 'password';
+                eyePath.setAttribute('d', 'M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z');
+            }
+        }
+
+        window.checkPassword = async function() {
+            const pass = document.getElementById('admin-pass').value;
+            const btn = document.querySelector('.login-box button');
+            const originalText = btn.textContent;
+            btn.textContent = 'Verifica...';
+            btn.disabled = true;
+
+            try {
+                // Genera l'hash SHA-256 della password inserita per non esporla
+                const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                // Hash della password predefinita come fallback
+                let correctHash = "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9"; 
+
+                // Recupera l'hash aggiornato dal database
+                if (firebaseConfig.apiKey !== "INSERISCI_LA_TUA_API_KEY" && db) {
+                    const adminDoc = await db.collection("settings").doc("admin").get();
+                    if (adminDoc.exists && adminDoc.data().password_hash) {
+                        correctHash = adminDoc.data().password_hash;
+                    }
+                }
+
+                if(hashHex === correctHash) {
+                    document.getElementById('login-overlay').style.display = 'none';
+                    loadDishes();
+                    loadGallery();
+                    loadSettings();
+                } else {
+                    alert('Password errata!');
+                }
+            } catch (err) {
+                console.error("Errore verifica password:", err);
+                alert("Errore di connessione al database.");
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+
+        async function loadSettings() {
+            try {
+                const textsDoc = await db.collection("settings").doc("texts").get();
+                if (textsDoc.exists) {
+                    const data = textsDoc.data();
+                    if (data.restaurant_name) {
+                        document.getElementById('restaurant-name').value = data.restaurant_name;
+                    }
+                }
+
+                const colorsDoc = await db.collection("settings").doc("colors").get();
+                if (colorsDoc.exists) {
+                    const data = colorsDoc.data();
+                    if (data.primary_color) {
+                        document.getElementById('primary-color').value = data.primary_color;
+                        document.documentElement.style.setProperty('--accent', data.primary_color);
+                    }
+                }
+            } catch (err) {
+                console.error("Errore nel caricamento impostazioni:", err);
+            }
+        }
+
+        const statusMsg = document.getElementById('status-msg');
+        function showMessage(msg, type) {
+            statusMsg.textContent = msg;
+            statusMsg.className = type;
+            statusMsg.style.display = 'block';
+            setTimeout(() => { statusMsg.style.display = 'none'; }, 5000);
+        }
+
+        async function loadDishes() {
+            const dishesList = document.getElementById('dishes-list');
+            try {
+                const querySnapshot = await db.collection("dishes").get();
+                if (querySnapshot.empty) {
+                    dishesList.innerHTML = '<p>Nessun piatto presente sul cloud.</p>';
+                    window.existingDishOrders = [];
+                    document.getElementById('order').value = 1;
+                    return;
+                }
+
+                let dishesArray = [];
+                querySnapshot.forEach((doc) => {
+                    dishesArray.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Ordina lato client per evitare problemi con i vecchi documenti senza campo order
+                dishesArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                // Salva gli ordini occupati e calcola il prossimo disponibile
+                window.existingDishOrders = dishesArray.map(d => d.order || 0);
+                const maxDishOrder = window.existingDishOrders.length > 0 ? Math.max(...window.existingDishOrders) : 0;
+                document.getElementById('order').value = maxDishOrder + 1;
+
+                let html = '';
+                dishesArray.forEach((dish) => {
+                    html += `
+                        <div class="dish-item">
+                            <img src="${dish.image_url}" class="dish-img" alt="${dish.title}">
+                            <div class="dish-info">
+                                <h3>${dish.title} <span style="font-size: 0.8rem; color: #888; margin-left: 10px;">(Ordine: ${dish.order || 0})</span></h3>
+                                <p>${dish.description}</p>
+                                <span class="dish-price">${dish.price}</span>
+                            </div>
+                            <button class="btn-delete" data-id="${dish.id}" data-url="${dish.image_url}">Elimina</button>
+                        </div>
+                    `;
+                });
+                dishesList.innerHTML = html;
+
+                // Add event listeners per Delete
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if(confirm('Eliminare questo piatto?')) {
+                            const id = e.target.getAttribute('data-id');
+                            await deleteDish(id);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Errore:", error);
+                dishesList.innerHTML = '<p style="color:red">Errore nel caricamento: verifica le chiavi Firebase e le regole Firestore.</p>';
+            }
+        }
+
+        async function deleteDish(id) {
+            try {
+                // Delete doc from Firestore
+                await db.collection("dishes").doc(id).delete();
+                
+                loadDishes();
+            } catch (error) {
+                alert('Errore di connessione a Firebase');
+            }
+        }
+
+        async function loadGallery() {
+            const galleryList = document.getElementById('gallery-list');
+            try {
+                const querySnapshot = await db.collection("gallery").get();
+                if (querySnapshot.empty) {
+                    galleryList.innerHTML = '<p>Nessuna foto presente sul cloud.</p>';
+                    window.existingGalleryOrders = [];
+                    document.getElementById('gallery-order').value = 1;
+                    return;
+                }
+
+                let galleryArray = [];
+                querySnapshot.forEach((doc) => {
+                    galleryArray.push({ id: doc.id, ...doc.data() });
+                });
+                
+                galleryArray.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+                // Salva gli ordini occupati e calcola il prossimo disponibile
+                window.existingGalleryOrders = galleryArray.map(p => p.order || 0);
+                const maxGalleryOrder = window.existingGalleryOrders.length > 0 ? Math.max(...window.existingGalleryOrders) : 0;
+                document.getElementById('gallery-order').value = maxGalleryOrder + 1;
+
+                let html = '';
+                galleryArray.forEach((photo) => {
+                    html += `
+                        <div class="dish-item">
+                            <img src="${photo.image_url}" class="dish-img" alt="Gallery Photo">
+                            <div class="dish-info">
+                                <h3>Foto Galleria <span style="font-size: 0.8rem; color: #888; margin-left: 10px;">(Ordine: ${photo.order || 0})</span></h3>
+                            </div>
+                            <button class="btn-delete" data-gallery-id="${photo.id}">Elimina</button>
+                        </div>
+                    `;
+                });
+                galleryList.innerHTML = html;
+
+                document.querySelectorAll('.btn-delete[data-gallery-id]').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if(confirm('Eliminare questa foto dalla galleria?')) {
+                            const id = e.target.getAttribute('data-gallery-id');
+                            await deleteGallery(id);
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error("Errore:", error);
+                galleryList.innerHTML = '<p style="color:red">Errore nel caricamento.</p>';
+            }
+        }
+
+        async function deleteGallery(id) {
+            try {
+                await db.collection("gallery").doc(id).delete();
+                loadGallery();
+            } catch (error) {
+                alert('Errore di connessione a Firebase');
+            }
+        }
+
+        // Funzione per comprimere l'immagine e convertirla in Base64 per evitare Firebase Storage
+        // Utilizziamo WebP per supportare sfondi trasparenti (PNG) e avere una qualità altissima sotto 1MB.
+        function compressImage(file, maxSize = 1200) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = event => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Ridimensiona mantenendo le proporzioni
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height *= maxSize / width;
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width *= maxSize / height;
+                                height = maxSize;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Massima qualità di ridimensionamento per non perdere nitidezza
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Esporta come WEBP per supportare trasparenza e avere qualità altissima (0.92)
+                        let dataUrl = canvas.toDataURL('image/webp', 0.92);
+                        
+                        // Controllo di sicurezza: Firestore ha un limite di 1MB per documento (~1,048,576 bytes)
+                        // Calcolo dei byte approssimativi del Base64
+                        let sizeInBytes = Math.round((dataUrl.length * 3) / 4);
+                        
+                        if (sizeInBytes > 1000000) {
+                            console.warn("L'immagine è molto pesante, applico una compressione maggiore per non far esplodere Firestore...");
+                            dataUrl = canvas.toDataURL('image/webp', 0.75); // Compressione di sicurezza
+                        }
+                        
+                        resolve(dataUrl);
+                    };
+                    img.onerror = error => reject(error);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        document.getElementById('add-dish-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.textContent = 'Caricamento in corso... attendi';
+            submitBtn.disabled = true;
+
+            const title = document.getElementById('title').value;
+            const price = document.getElementById('price').value;
+            const description = document.getElementById('description').value;
+            const orderValue = parseInt(document.getElementById('order').value) || 0;
+            const file = document.getElementById('image').files[0];
+
+            if (window.existingDishOrders && window.existingDishOrders.includes(orderValue)) {
+                showMessage(`Errore: La posizione ${orderValue} è già occupata da un altro piatto! Scegli un altro numero.`, "error");
+                submitBtn.textContent = 'Carica e Salva Piatto';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if (!file) {
+                showMessage("Seleziona un'immagine!", "error");
+                submitBtn.textContent = 'Carica e Salva Piatto';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                // Comprime ad altissima qualità per i piatti (max 1500px)
+                const base64Image = await compressImage(file, 1500);
+
+                // 2. Salva documento su Firestore con l'immagine inclusa
+                await db.collection("dishes").add({
+                    title: title,
+                    price: price,
+                    description: description,
+                    order: orderValue,
+                    image_url: base64Image,
+                    createdAt: new Date()
+                });
+
+                showMessage('Piatto salvato con successo sul Cloud!', 'success');
+                document.getElementById('add-dish-form').reset();
+                loadDishes();
+
+            } catch (error) {
+                console.error("Errore salvataggio:", error);
+                showMessage('Errore durante il caricamento. Controlla le regole di Firebase Storage/Firestore.', 'error');
+            }
+
+            submitBtn.textContent = 'Carica e Salva Piatto';
+            submitBtn.disabled = false;
+        });
+
+        document.getElementById('update-text-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-text-btn');
+            submitBtn.textContent = 'Aggiornamento in corso...';
+            submitBtn.disabled = true;
+
+            const name = document.getElementById('restaurant-name').value;
+
+            try {
+                await db.collection("settings").doc("texts").set({
+                    restaurant_name: name
+                }, { merge: true });
+
+                alert('Nome del ristorante aggiornato con successo! Ricarica il sito per vedere i cambiamenti.');
+                document.getElementById('update-text-form').reset();
+            } catch (error) {
+                console.error("Errore salvataggio nome:", error);
+                alert('Errore durante l\'aggiornamento del nome.');
+            }
+
+            submitBtn.textContent = 'Aggiorna Nome Ristorante';
+            submitBtn.disabled = false;
+        });
+
+        document.getElementById('update-color-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-color-btn');
+            submitBtn.textContent = 'Aggiornamento in corso...';
+            submitBtn.disabled = true;
+
+            const color = document.getElementById('primary-color').value;
+
+            try {
+                await db.collection("settings").doc("colors").set({
+                    primary_color: color
+                }, { merge: true });
+
+                alert('Colore principale aggiornato con successo! Ricarica il sito per vedere i cambiamenti.');
+            } catch (error) {
+                console.error("Errore salvataggio colore:", error);
+                alert('Errore durante l\'aggiornamento del colore.');
+            }
+
+            submitBtn.textContent = 'Aggiorna Colore';
+            submitBtn.disabled = false;
+        });
+
+        document.getElementById('reset-color-btn').addEventListener('click', async () => {
+            if(confirm("Vuoi davvero rimuovere il colore personalizzato e tornare a quello originale di default?")) {
+                const btn = document.getElementById('reset-color-btn');
+                btn.textContent = "Ripristino in corso...";
+                btn.disabled = true;
+
+                try {
+                    await db.collection("settings").doc("colors").update({
+                        primary_color: firebase.firestore.FieldValue.delete()
+                    });
+                    localStorage.removeItem('aura_primary_color');
+                    document.getElementById('primary-color').value = '#E2B659';
+                    document.documentElement.style.setProperty('--accent', '#E2B659');
+                    alert("Colore ripristinato con successo! Ricarica il sito per vederlo aggiornato.");
+                } catch(err) {
+                    if (err.code === 'not-found') {
+                        alert("Non c'era nessun colore personalizzato. È già quello originale!");
+                    } else {
+                        console.error("Errore ripristino:", err);
+                        alert("Errore durante il ripristino.");
+                    }
+                }
+                btn.textContent = "Ripristina Originale";
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('add-gallery-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-gallery-btn');
+            submitBtn.textContent = 'Caricamento in corso... attendi';
+            submitBtn.disabled = true;
+
+            const orderValue = parseInt(document.getElementById('gallery-order').value) || 0;
+            const file = document.getElementById('gallery-image').files[0];
+            const galleryStatusMsg = document.getElementById('gallery-status-msg');
+
+            function showGalleryMessage(msg, type) {
+                galleryStatusMsg.textContent = msg;
+                galleryStatusMsg.className = type;
+                galleryStatusMsg.style.display = 'block';
+                setTimeout(() => { galleryStatusMsg.style.display = 'none'; }, 5000);
+            }
+
+            if (window.existingGalleryOrders && window.existingGalleryOrders.includes(orderValue)) {
+                showGalleryMessage(`Errore: La posizione ${orderValue} è già occupata da un'altra foto! Scegli un altro numero.`, "error");
+                submitBtn.textContent = 'Carica e Salva Foto';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if (!file) {
+                showGalleryMessage("Seleziona un'immagine per la galleria!", "error");
+                submitBtn.textContent = 'Carica e Salva Foto';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                const base64Image = await compressImage(file, 1500);
+
+                await db.collection("gallery").add({
+                    order: orderValue,
+                    image_url: base64Image,
+                    createdAt: new Date()
+                });
+
+                showGalleryMessage('Foto salvata con successo!', 'success');
+                document.getElementById('add-gallery-form').reset();
+                loadGallery();
+
+            } catch (error) {
+                console.error("Errore salvataggio galleria:", error);
+                showGalleryMessage('Errore durante il caricamento.', 'error');
+            }
+
+            submitBtn.textContent = 'Carica e Salva Foto';
+            submitBtn.disabled = false;
+        });
+
+        document.getElementById('update-image-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submit-img-btn');
+            submitBtn.textContent = 'Aggiornamento in corso...';
+            submitBtn.disabled = true;
+
+            const slot = document.getElementById('image-slot').value;
+            const file = document.getElementById('site-image').files[0];
+
+            if (!file || !slot) {
+                alert("Seleziona uno slot e un'immagine!");
+                submitBtn.textContent = 'Aggiorna Immagine Sito';
+                submitBtn.disabled = false;
+                return;
+            }
+
+            try {
+                // Comprime a risoluzione altissima per le immagini di sfondo (es. 2500px)
+                const maxSize = slot === 'hero_bg' ? 2500 : 1600;
+                const base64Image = await compressImage(file, maxSize);
+
+                // Salva nel documento 'settings/images'
+                // Usa set() con merge: true per non sovrascrivere gli altri slot
+                await db.collection("settings").doc("images").set({
+                    [slot]: base64Image
+                }, { merge: true });
+
+                alert('Immagine del sito aggiornata con successo! Ricarica il sito per vedere i cambiamenti.');
+                document.getElementById('update-image-form').reset();
+            } catch (error) {
+                console.error("Errore salvataggio immagine:", error);
+                alert('Errore durante l\'aggiornamento.');
+            }
+
+            submitBtn.textContent = 'Aggiorna Immagine Sito';
+            submitBtn.disabled = false;
+        });
+
+        document.getElementById('reset-img-btn').addEventListener('click', async () => {
+            const slot = document.getElementById('image-slot').value;
+            if (!slot) {
+                alert("Seleziona prima uno slot dal menu a tendina per poterlo ripristinare!");
+                return;
+            }
+
+            if(confirm("Vuoi davvero rimuovere l'immagine personalizzata e tornare a quella originale di default per questo slot?")) {
+                const btn = document.getElementById('reset-img-btn');
+                btn.textContent = "Ripristino in corso...";
+                btn.disabled = true;
+
+                try {
+                    await db.collection("settings").doc("images").update({
+                        [slot]: firebase.firestore.FieldValue.delete()
+                    });
+                    if (slot === 'main_logo') {
+                        localStorage.removeItem('aura_main_logo');
+                    }
+                    alert("Immagine ripristinata con successo! Ricarica il sito per vedere quella originale.");
+                    document.getElementById('update-image-form').reset();
+                } catch(err) {
+                    // Se il documento non esiste ancora, update() fallisce.
+                    if (err.code === 'not-found') {
+                        alert("Non c'era nessuna immagine personalizzata caricata per questo slot. È già quella originale!");
+                    } else {
+                        console.error("Errore ripristino:", err);
+                        alert("Errore durante il ripristino.");
+                    }
+                }
+                btn.textContent = "Ripristina Originale";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
